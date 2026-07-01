@@ -1,0 +1,84 @@
+_jinja_extensions:
+  - copier_template_extensions.TemplateExtensionLoader
+  - extensions/context.py:GitInfoExtension
+
+project_name:
+  type: str
+  help: Human-readable project name
+  default: "{{ current_folder_name | replace('_', ' ') | replace('-', ' ') | title }}"
+
+author_name:
+  type: str
+  help: Author name
+  default: "{{ git_user_name | default('Your Name', true) }}"
+
+author_email:
+  type: str
+  help: Author email
+  default: "{{ git_user_email | default('your@email.com', true) }}"
+
+description:
+  type: str
+  help: Short project description
+  default: A FastAPI service.
+
+python_version:
+  type: str
+  help: Python version
+  default: "3.12"
+  choices:
+    - "3.13"
+    - "3.12"
+    - "3.11"
+    - "3.10"
+    - "3.9"
+
+add_pre_commit:
+  type: bool
+  default: true
+  help: Add pre-commit configuration?
+
+add_ci:
+  type: bool
+  default: true
+  help: Configure CI pipeline?
+
+ci_provider:
+  type: str
+  default: github
+  choices:
+    Github Actions: github
+    GitLab CI: gitlab
+    Bitbucket Pipelines: bitbucket
+  help: Which CI provider are you using?
+  when: "{{ add_ci }}"
+
+install_dependencies:
+  type: bool
+  default: true
+  help: Run uv sync after generation?
+
+install_pre_commit_hooks:
+  type: bool
+  default: false
+  help: Install pre-commit hooks automatically?
+  when: "{{ install_dependencies and add_pre_commit }}"
+
+_tasks:
+  - command: "uv sync"
+    when: "{{ install_dependencies }}"
+
+  - command: |
+      if [ ! -d .git ]; then
+          git init
+      fi
+
+      if ! git ls-files .copier-answers.yml --error-unmatch > /dev/null 2>&1; then
+          git add .
+          git commit -m "chore: initial commit from template"
+      fi
+
+  - command: "uv run pre-commit install"
+    when: "{{ install_pre_commit_hooks | default(false) }}"
+
+_subdirectory: template

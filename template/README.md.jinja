@@ -1,0 +1,146 @@
+# {{ project_name }}
+
+{{ description }}
+
+## 🛠️ Setup
+
+### 1. Install dependencies and dev tools
+
+This project uses uv for dependency and tooling management.
+Use this command mainly for local dev tools (ruff, mypy, pre-commit, alembic, etc.).
+
+```bash
+uv sync
+```
+
+### 2. Run the local stack (API + PostgreSQL)
+
+```bash
+docker compose up
+```
+
+### 3. Quality checks (app only)
+
+```bash
+uv run ruff check app
+uv run ruff format app
+uv run mypy app
+```
+
+### 4. Database migrations workflow
+
+Create a new revision from model changes:
+
+```bash
+make autogenerate m="your_migration_message"
+```
+
+Create a manual revision:
+
+```bash
+make revision m="your_manual_message"
+```
+
+Apply pending migrations:
+
+```bash
+make migrate
+```
+
+Show migration history:
+
+```bash
+make history
+```
+
+Rollback one migration:
+
+```bash
+make downgrade
+```
+
+{% if add_pre_commit -%}
+### 5. Enable pre-commit hooks
+
+```bash
+uv run pre-commit install
+```
+
+{% endif -%}
+## 🧭 Workflow Schema
+
+```text
+Edit app code
+  -> Run checks (ruff/mypy on app)
+  -> Update SQLAlchemy models if needed
+  -> Generate migration (make autogenerate)
+  -> Review migration file
+  -> Apply migration (make migrate)
+  -> Start stack (docker compose up)
+  -> Test API endpoints
+```
+
+## 📂 API Structure
+
+```text
+app/
+	api/
+		deps.py
+		router.py
+		v1/
+			router.py
+			endpoints/
+				...
+	core/
+		config.py
+		logging.py
+		middleware.py
+	db/
+		base.py
+		session.py
+		crud/
+			...
+	models/
+		...
+	schemas/
+		...
+	services/
+		health.py
+	main.py
+
+migrations/
+	env.py
+	versions/
+		...
+```
+
+## ⚙️ Environment Variables
+
+Variables are loaded through pydantic-settings from `.env`.
+See `.env.example` for defaults.
+
+Docker Compose uses explicit local credentials for API ↔ PostgreSQL wiring.
+
+## 🚀 API Routes
+
+Health endpoint:
+- GET /health
+
+Item endpoints:
+- GET /api/v1/items
+- GET /api/v1/items/{item_id}
+- POST /api/v1/items
+
+## 🐳 Docker
+
+Build image:
+
+```bash
+docker build -t {{ project_name|lower|replace('_', '-')|replace(' ', '-') }} .
+```
+
+Run container:
+
+```bash
+docker run -it --rm -p 8000:8000 --env-file .env {{ project_name|lower|replace('_', '-')|replace(' ', '-') }}
+```

@@ -1,0 +1,13 @@
+# Changes here will be overwritten by Copier updates
+_commit: "{{ _copier_answers._commit if _copier_answers else None }}"
+_src_path: "{{ _copier_conf.src_path }}"
+project_name: "{{ project_name }}"
+author_name: "{{ author_name }}"
+author_email: "{{ author_email }}"
+description: "{{ description }}"
+python_version: "{{ python_version }}"
+add_pre_commit: {{ add_pre_commit }}
+add_ci: {{ add_ci }}
+ci_provider: "{{ ci_provider if add_ci else '' }}"
+install_dependencies: {{ install_dependencies }}
+install_pre_commit_hooks: {{ install_pre_commit_hooks if add_pre_commit else false }}

@@ -1,0 +1,14 @@
+image: python:{{ python_version }}
+
+stages:
+  - quality
+
+before_script:
+  - pip install uv
+  - uv sync --frozen
+
+quality:
+  stage: quality
+  script:
+    - uv run ruff check app
+    - uv run mypy app
