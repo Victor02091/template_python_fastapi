@@ -4,7 +4,7 @@
 
 ## 🛠️ Setup
 
-### 1. Install dependencies and dev tools
+### 📦 Install dependencies and dev tools
 
 This project uses uv for dependency and tooling management.
 Use this command mainly for local dev tools (ruff, mypy, pre-commit, alembic, etc.).
@@ -13,71 +13,49 @@ Use this command mainly for local dev tools (ruff, mypy, pre-commit, alembic, et
 uv sync
 ```
 
-### 2. Run the local stack (API + PostgreSQL)
-
-```bash
-docker compose up
-```
-
-### 3. Quality checks (app only)
-
-```bash
-uv run ruff check app
-uv run ruff format app
-uv run mypy app
-```
-
-### 4. Database migrations workflow
-
-Create a new revision from model changes:
-
-```bash
-make autogenerate m="your_migration_message"
-```
-
-Create a manual revision:
-
-```bash
-make revision m="your_manual_message"
-```
-
-Apply pending migrations:
-
-```bash
-make migrate
-```
-
-Show migration history:
-
-```bash
-make history
-```
-
-Rollback one migration:
-
-```bash
-make downgrade
-```
-
-{% if add_pre_commit -%}
-### 5. Enable pre-commit hooks
+{% if add_pre_commit %}
+### 🪝 Enable pre-commit hooks
 
 ```bash
 uv run pre-commit install
 ```
 
-{% endif -%}
-## 🧭 Workflow Schema
+{% endif %}
 
-```text
-Edit app code
-  -> Run checks (ruff/mypy on app)
-  -> Update SQLAlchemy models if needed
-  -> Generate migration (make autogenerate)
-  -> Review migration file
-  -> Apply migration (make migrate)
-  -> Start stack (docker compose up)
-  -> Test API endpoints
+## ▶️ Run the local stack (API + PostgreSQL)
+
+```bash
+docker compose up
+```
+
+## 🗄️ Database migrations workflow
+
+You must use alembic inside your running container using the following commands.
+
+Create a new revision from model changes:
+
+```bash
+make alembic-autogenerate m="your_migration_message"
+```
+
+Create a manual revision:
+
+```bash
+make alembic-revision m="your_manual_message"
+```
+
+Apply pending migrations:
+
+```bash
+make alembic-migrate
+```
+
+## ✅ Quality checks
+
+```bash
+uv run ruff check app
+uv run ruff format app
+uv run mypy app
 ```
 
 ## 📂 API Structure
