@@ -1,7 +1,11 @@
 FROM python:{{ python_version }}-slim-bookworm AS base
 
+# -------------------------
+# Builder
+# -------------------------
 FROM base AS builder
 
+# Install uv
 COPY --from=ghcr.io/astral-sh/uv:0.9.17 /uv /bin/uv
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -11,17 +15,27 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY pyproject.toml ./
-RUN uv sync --frozen --no-install-project --no-dev
+# Copy only uv.lock and pyproject.toml first (layer caching)
+COPY uv.lock pyproject.toml ./
 
+# Install dependencies using uv
+RUN uv sync --frozen --no-dev
+
+# Copy the rest of the application code
 COPY app ./app
 COPY alembic.ini ./
 COPY migrations ./migrations
-RUN uv sync --frozen --no-dev
 
+# -------------------------
+# Final runtime image
+# -------------------------
 FROM base
-
 COPY --from=builder /app /app
+
+# Add git commit
+ARG GIT_COMMIT="" 
+ENV GIT_COMMIT=${GIT_COMMIT}
+
 ENV PATH=/app/.venv/bin:$PATH PYTHONPATH=/app
 WORKDIR /app
 
