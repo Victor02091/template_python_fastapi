@@ -1,0 +1,13 @@
+image: python:{{ python_version }}
+
+pipelines:
+  default:
+    - step:
+        name: Lint and Type Check
+        caches:
+          - pip
+        script:
+          - pip install uv
+          - uv sync --frozen
+          - uv run ruff check app
+          - uv run mypy app

@@ -1,0 +1,124 @@
+# {{ project_name }}
+
+{{ description }}
+
+## 🛠️ Setup
+
+### 📦 Install dependencies and dev tools
+
+This project uses uv for dependency and tooling management.
+Use this command mainly for local dev tools (ruff, mypy, pre-commit, alembic, etc.).
+
+```bash
+uv sync
+```
+
+{% if add_pre_commit %}
+### 🪝 Enable pre-commit hooks
+
+```bash
+uv run pre-commit install
+```
+
+{% endif %}
+
+## ▶️ Run the local stack (API + PostgreSQL)
+
+```bash
+docker compose up
+```
+
+## 🗄️ Database migrations workflow
+
+You must use alembic inside your running container using the following commands.
+
+Create a new revision from model changes:
+
+```bash
+make alembic-autogenerate m="your_migration_message"
+```
+
+Create a manual revision:
+
+```bash
+make alembic-revision m="your_manual_message"
+```
+
+Apply pending migrations:
+
+```bash
+make alembic-migrate
+```
+
+## ✅ Quality checks
+
+```bash
+uv run ruff check app
+uv run ruff format app
+uv run mypy app
+```
+
+## 📂 API Structure
+
+```text
+app/
+	api/
+		deps.py
+		router.py
+		v1/
+			router.py
+			endpoints/
+				...
+	core/
+		config.py
+		logging.py
+		middleware.py
+	db/
+		base.py
+		session.py
+		crud/
+			...
+	models/
+		...
+	schemas/
+		...
+	services/
+		health.py
+	main.py
+
+migrations/
+	env.py
+	versions/
+		...
+```
+
+## ⚙️ Environment Variables
+
+Variables are loaded through pydantic-settings from `.env`.
+See `.env.example` for defaults.
+
+Docker Compose uses explicit local credentials for API ↔ PostgreSQL wiring.
+
+## 🚀 API Routes
+
+Health endpoint:
+- GET /health
+
+Item endpoints:
+- GET /api/v1/items
+- GET /api/v1/items/{item_id}
+- POST /api/v1/items
+
+## 🐳 Docker
+
+Build image:
+
+```bash
+docker build -t {{ project_name|lower|replace('_', '-')|replace(' ', '-') }} .
+```
+
+Run container:
+
+```bash
+docker run -it --rm -p 8000:8000 --env-file .env {{ project_name|lower|replace('_', '-')|replace(' ', '-') }}
+```
