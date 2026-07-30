@@ -18,9 +18,9 @@ jobs:
 
       - name: Set up Git config
         run: |
-          # Required because your template's _tasks run 'git commit'
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # Required because the template's _tasks run 'git commit'
+          git config --global user.name "github-actions-bot"
+          git config --global user.email "github-actions-bot@users.noreply.github.com"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -40,6 +40,14 @@ jobs:
           # --trust allows Copier to run your post-generation _tasks
           # --defaults accepts all default answers automatically
           copier copy --trust --defaults . generated-project
+
+      - name: Lint Code (Ruff)
+        working-directory: generated-project
+        run: uv run ruff check .
+
+      - name: Type Check (Mypy)
+        working-directory: generated-project
+        run: uv run mypy
 
       - name: Test Docker Build
         working-directory: generated-project
@@ -62,5 +70,3 @@ jobs:
         if: failure()
         working-directory: generated-project
         run: docker compose logs
-      
-      
