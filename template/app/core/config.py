@@ -7,7 +7,9 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     environment: Literal["local", "test", "dev", "preprod", "prod"] = "local"
-    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = (
+        "INFO"
+    )
     git_commit: str = "local-dev"
 
     db_username: str = "local_user"
