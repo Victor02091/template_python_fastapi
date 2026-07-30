@@ -1,0 +1,66 @@
+name: Test Copier Template
+
+on:
+  push:
+  pull_request:
+  # Schedule a run once a month to catch upstream dependency breaks
+  schedule:
+    - cron: '0 0 1 * *'
+
+jobs:
+  test-generation-and-build:
+    name: Generate and Test Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout template repository
+        uses: actions/checkout@v4
+
+      - name: Set up Git config
+        run: |
+          # Required because your template's _tasks run 'git commit'
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install Copier
+        run: uv tool install copier
+
+      - name: Generate project from template
+        run: |
+          # --trust allows Copier to run your post-generation _tasks
+          # --defaults accepts all default answers automatically
+          copier copy --trust --defaults . generated-project
+
+      - name: Test Docker Build
+        working-directory: generated-project
+        run: |
+          # Validates your Dockerfile and Docker Compose syntax
+          docker compose build
+
+      - name: Test Services (Up & Wait)
+        working-directory: generated-project
+        run: |
+          docker compose up -d --wait
+          
+          # Give the API a few seconds to run migrations and boot up
+          sleep 5 
+          
+          # Hit the dedicated /health endpoint
+          curl --fail --silent --show-error http://localhost:8000/health > /dev/null
+
+      - name: Print Docker Logs on Failure
+        if: failure()
+        working-directory: generated-project
+        run: docker compose logs
+      
+      
