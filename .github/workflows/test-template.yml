@@ -33,7 +33,7 @@ jobs:
           enable-cache: true
 
       - name: Install Copier
-        run: uv tool install copier
+        run: uv tool install copier --with copier-template-extensions
 
       - name: Generate project from template
         run: |
