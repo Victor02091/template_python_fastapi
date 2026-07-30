@@ -60,7 +60,7 @@ install_dependencies:
 
 install_pre_commit_hooks:
   type: bool
-  default: false
+  default: true
   help: Install pre-commit hooks automatically?
   when: "{{ install_dependencies and add_pre_commit }}"
 
@@ -75,7 +75,7 @@ _tasks:
 
       if ! git ls-files .copier-answers.yml --error-unmatch > /dev/null 2>&1; then
           git add .
-          git commit -m "chore: initial commit from template"
+          git commit --no-verify -m "chore: initial commit from template"
       fi
 
   - command: "uv run pre-commit install"
