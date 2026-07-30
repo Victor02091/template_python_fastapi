@@ -14,7 +14,7 @@ This template provides a batteries-included setup with modern tooling, strict li
 * **CI/CD:** CI pipelines for GitHub Actions, GitLab CI, or Bitbucket Pipelines (optional).
 * **Containerization:** Dockerfile and docker-compose included.
 * **Database:** [SQLAlchemy](https://www.sqlalchemy.org/) ORM with async support, [Alembic](https://alembic.sqlalchemy.org/) migrations, and [PostgreSQL](https://www.postgresql.org/) via `asyncpg` pre-configured.
-* **Editor:** VS Code settings (extensions, tests, and linting) pre-configured.
+* **Editor:** VS Code settings (extensions, and linting) pre-configured.
 
 ## 📂 Project Structure
 

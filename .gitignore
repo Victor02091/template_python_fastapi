@@ -1,0 +1,15 @@
+# OS & IDE Files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Python Environments & Cache
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Copier Local Testing Output
+generated-project/
+test-project/
