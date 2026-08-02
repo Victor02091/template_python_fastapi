@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     )
     git_commit: str = "local-dev"
 
+    oidc_authority: str
+    oidc_client_id: str
+
     db_username: str = "local_user"
     db_password: str = "local_password"
     db_host: str = "db"
