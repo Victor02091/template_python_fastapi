@@ -1,5 +1,7 @@
+from functools import lru_cache
 from typing import Literal
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,8 +14,8 @@ class Settings(BaseSettings):
     )
     git_commit: str = "local-dev"
 
-    oidc_authority: str
-    oidc_client_id: str
+    oidc_authority: str = Field(default=...)
+    oidc_client_id: str = Field(default=...)
 
     db_username: str = "local_user"
     db_password: str = "local_password"
@@ -31,4 +33,12 @@ class Settings(BaseSettings):
         )
 
 
-settings = Settings()
+# Avoid loading at every import
+@lru_cache
+def get_settings() -> Settings:
+    """Return settings"""
+
+    return Settings()
+
+
+settings = get_settings()
