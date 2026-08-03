@@ -28,6 +28,24 @@ uv run pre-commit install
 docker compose up
 ```
 
+{% if use_oidc and oidc_provider == 'Local Keycloak' %}
+### 🔐 Local Keycloak login
+
+If you selected Local Keycloak, you can log in in your frontend with these predefined accounts:
+
+- `test_user` (password: `password`) - role `user`
+- `test_admin` (password: `password`) - role `admin`
+
+To administer Keycloak locally, open:
+
+- `http://localhost:9080/admin`
+
+Admin credentials:
+
+- username: `admin`
+- password: `admin`
+{% endif %}
+
 ## 🗄️ Database migrations workflow
 
 You must use alembic inside your running container using the following commands.
@@ -83,7 +101,7 @@ app/
 	schemas/
 		...
 	services/
-		health.py
+		...
 	main.py
 
 migrations/
@@ -92,12 +110,19 @@ migrations/
 		...
 ```
 
-## ⚙️ Environment Variables
+## ⚙️ Environment variables
 
-Variables are loaded through pydantic-settings from `.env`.
-See `.env.example` for defaults.
+Please define and import all environment variables in your code from [config.py](./app/core/config.py) file like so: 
 
-Docker Compose uses explicit local credentials for API ↔ PostgreSQL wiring.
+```python
+class Settings(BaseSettings):
+    """Load environment variables as settings."""
+    
+    my_env_variable_1: str # MY_ENV_VARIABLE_1
+    my_env_variable_2: int = 5 # MY_ENV_VARIABLE_2
+```
+
+During local development, use the .env file and docker-compose to set environment variables.
 
 ## 🚀 API Routes
 
@@ -122,3 +147,7 @@ Run container:
 ```bash
 docker run -it --rm -p 8000:8000 --env-file .env {{ project_name|lower|replace('_', '-')|replace(' ', '-') }}
 ```
+
+## 📧 Contacts
+
+* **{{ author_name }}** - [{{ author_email }}](mailto:{{ author_email }})

@@ -1,0 +1,67 @@
+services:{% if use_oidc and oidc_provider == 'Local Keycloak' %}
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.0
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: true
+    ports:
+      - "9080:8080"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    healthcheck:
+      test: ["CMD-SHELL", "{ printf 'HEAD /health/ready HTTP/1.0\\r\\n\\r\\n' >&0; grep 'HTTP/1.0 200'; } 0<>/dev/tcp/localhost/9000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+      start_interval: 5s
+{% endif %}
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: local_user
+      POSTGRES_PASSWORD: local_password
+      POSTGRES_DB: local_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U local_user -d local_app"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DB_USERNAME: local_user
+      DB_PASSWORD: local_password
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: local_app{% if use_oidc %}
+      OIDC_AUTHORITY: {% if oidc_provider == 'Local Keycloak' %}http://keycloak:8080/realms/my-app{% else %}{{ oidc_authority }}{% endif %}
+      OIDC_CLIENT_ID: {% if oidc_provider == 'Local Keycloak' %}my-react-spa{% else %}{{ oidc_client_id }}{% endif %}{% endif %}
+    depends_on:
+      db:
+        condition: service_healthy{% if use_oidc and oidc_provider == 'Local Keycloak' %}
+      keycloak:
+        condition: service_healthy{% endif %}
+    user: "${UID:-1000}:${GID:-1000}" # For alembic generated files
+    volumes:
+      - ./app:/app/app
+      - ./migrations:/app/migrations
+      - ./alembic.ini:/app/alembic.ini
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+volumes:
+  pgdata:
