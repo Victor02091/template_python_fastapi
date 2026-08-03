@@ -28,6 +28,24 @@ uv run pre-commit install
 docker compose up
 ```
 
+{% if use_oidc and oidc_provider == 'Local Keycloak' %}
+### 🔐 Local Keycloak login
+
+If you selected Local Keycloak, you can log in in your frontend with these predefined accounts:
+
+- `test_user` (password: `password`) - role `user`
+- `test_admin` (password: `password`) - role `admin`
+
+To administer Keycloak locally, open:
+
+- `http://localhost:9080/admin`
+
+Admin credentials:
+
+- username: `admin`
+- password: `admin`
+{% endif %}
+
 ## 🗄️ Database migrations workflow
 
 You must use alembic inside your running container using the following commands.
