@@ -21,6 +21,10 @@ It is designed to work seamlessly with the [frontend template](https://github.co
 * **Database:** [SQLAlchemy](https://www.sqlalchemy.org/) ORM with async support, [Alembic](https://alembic.sqlalchemy.org/) migrations, and [PostgreSQL](https://www.postgresql.org/) via `asyncpg` pre-configured.
 * **Editor:** VS Code settings (extensions, and linting) pre-configured.
 
+## 📸 Swagger UI Preview
+
+![Swagger UI screenshot](images/swagger_ui.png)
+
 ## 📂 Project Structure
 
 The template generates a clean, production-ready directory layout:
@@ -90,7 +94,7 @@ If you have already generated a project and want to change the current values, l
 
 If you have already generated a project and want to pull the latest updates from the template:
 
-        copier update --trust
+    copier update --trust
 
 ---
 

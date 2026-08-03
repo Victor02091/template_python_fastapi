@@ -15,6 +15,13 @@ app = FastAPI(
     title="{{ project_name }}",
     description="{{ description }}",
     version="0.1.0",
+{%- if use_oidc %}
+    swagger_ui_init_oauth={
+        "clientId": settings.oidc_client_id,
+        "appName": "{{ project_name }}",
+        "usePkceWithAuthorizationCodeGrant": True,
+    },
+{%- endif %}
 )
 setup_middlewares(app)
 app.include_router(api_router, prefix="/api")
