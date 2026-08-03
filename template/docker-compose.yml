@@ -53,6 +53,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      keycloak:
+        condition: service_healthy
     user: "${UID:-1000}:${GID:-1000}" # For alembic generated files
     volumes:
       - ./app:/app/app
