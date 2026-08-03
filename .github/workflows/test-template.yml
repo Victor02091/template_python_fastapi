@@ -47,11 +47,8 @@ jobs:
         run: |
           # --trust allows Copier to run your post-generation _tasks
           # --defaults accepts all default answers automatically
-          if [ "${{ matrix.use_oidc }}" = "false" ]; then
-            copier copy --trust --defaults --data use_oidc=false . generated-project-${{ matrix.mode }}
-          else
-            copier copy --trust --defaults . generated-project-${{ matrix.mode }}
-          fi
+          # --data explicitly forces the OIDC state for this matrix permutation
+          copier copy --trust --defaults --data use_oidc=${{ matrix.use_oidc }} . generated-project-${{ matrix.mode }}
 
       - name: Lint Code (Ruff)
         working-directory: generated-project-${{ matrix.mode }}
