@@ -1,0 +1,180 @@
+import logging
+import time
+from typing import Any
+from urllib.parse import urlparse
+
+import httpx
+import jwt
+from jwt import PyJWKClient
+
+from app.core.config import settings
+
+logger = logging.getLogger(__name__)
+
+
+class OIDCProvider:
+    """Fetch OIDC metadata and verify identity tokens."""
+
+    def __init__(
+        self, authority: str, client_id: str, cache_ttl_seconds: int = 3600
+    ) -> None:
+        self.authority = authority.rstrip("/")
+        self.client_id = client_id
+        self.well_known_url = (
+            f"{self.authority}/.well-known/openid-configuration"
+        )
+        self.cache_ttl_seconds = cache_ttl_seconds
+
+        self._config: dict[str, Any] = {}
+        self.jwks_client: PyJWKClient | None = None
+        self._role_cache: dict[str, dict[str, Any]] = {}
+
+        # Load config at startup so Swagger auth endpoints are ready.
+        self._load_config()
+
+    def _load_config(self) -> None:
+        """Fetch discovery metadata and initialize the JWKS client."""
+        try:
+            with httpx.Client(timeout=10.0) as client:
+                response = client.get(self.well_known_url)
+                response.raise_for_status()
+                self._config = response.json()
+
+            jwks_uri = self._config.get("jwks_uri")
+            if not jwks_uri:
+                raise ValueError("OIDC metadata missing 'jwks_uri'")
+
+            self.jwks_client = PyJWKClient(jwks_uri, cache_keys=True)
+            logger.info(
+                "OIDC provider initialized via %s", self.well_known_url
+            )
+        except Exception as exc:
+            logger.error(
+                "Failed to fetch OIDC metadata from %s: %s",
+                self.well_known_url,
+                exc,
+            )
+            raise RuntimeError(
+                f"Could not initialize OIDC provider: {exc}"
+            ) from exc
+
+    @property
+    def auth_url(self) -> str:
+        return self._config.get("authorization_endpoint", "")
+
+    @property
+    def token_url(self) -> str:
+        return self._config.get("token_endpoint", "")
+
+    @property
+    def userinfo_url(self) -> str:
+        return self._config.get("userinfo_endpoint", "")
+
+    def verify_token(self, token: str) -> dict[str, Any]:
+        """Verify JWT signature and ensure expected client/audience."""
+        if not self.jwks_client:
+            raise RuntimeError("OIDC provider not initialized")
+
+        try:
+            signing_key = self.jwks_client.get_signing_key_from_jwt(token)
+            payload = jwt.decode(
+                token,
+                signing_key.key,
+                algorithms=["RS256"],
+                options={"verify_aud": False},
+            )
+
+            token_client_id = (
+                payload.get("client_id")
+                or payload.get("azp")
+                or payload.get("aud")
+            )
+
+            if isinstance(token_client_id, list):
+                if self.client_id not in token_client_id:
+                    raise jwt.InvalidTokenError(
+                        "Token audience list does not contain client_id."
+                    )
+            elif token_client_id != self.client_id:
+                raise jwt.InvalidTokenError(
+                    f"Token client_id/azp '{token_client_id}' does not match "
+                    f"'{self.client_id}'."
+                )
+
+            return payload
+        except jwt.PyJWTError as exc:
+            logger.error("Security rejection - invalid token: %s", exc)
+            raise
+
+    async def get_user_roles(self, access_token: str, uid: str) -> list[str]:
+        """Resolve user roles from cache and the provider userinfo endpoint."""
+        current_time = time.time()
+
+        if uid in self._role_cache:
+            cached = self._role_cache[uid]
+            if current_time < cached["expires_at"]:
+                return cached["roles"]
+
+        if not self.userinfo_url:
+            logger.warning(
+                "No userinfo endpoint discovered; returning no roles"
+            )
+            return []
+
+        headers = {"Authorization": f"Bearer {access_token}"}
+        unverified_payload = jwt.decode(
+            access_token, options={"verify_signature": False}
+        )
+        issuer = unverified_payload.get("iss", "")
+
+        # Handle local split-brain hostnames (localhost vs docker service).
+        if "localhost" in issuer and "localhost" not in self.userinfo_url:
+            headers["Host"] = urlparse(issuer).netloc
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    self.userinfo_url,
+                    headers=headers,
+                    timeout=5.0,
+                )
+                response.raise_for_status()
+                user_data = response.json()
+
+            roles = set()
+
+            realm_access = unverified_payload.get("realm_access", {})
+            roles.update(realm_access.get("roles", []))
+
+            client_access = unverified_payload.get("resource_access", {}).get(
+                self.client_id, {}
+            )
+            roles.update(client_access.get("roles", []))
+
+            ui_roles = user_data.get(
+                "role",
+                user_data.get("roles", user_data.get("groups", [])),
+            )
+            if isinstance(ui_roles, str):
+                ui_roles = [ui_roles]
+            roles.update(ui_roles)
+
+            roles_list = list(roles)
+            self._role_cache[uid] = {
+                "roles": roles_list,
+                "expires_at": current_time + self.cache_ttl_seconds,
+            }
+            return roles_list
+        except Exception as exc:
+            logger.error(
+                "Failed to fetch userinfo from %s: %s",
+                self.userinfo_url,
+                exc,
+            )
+            return []
+
+
+oidc_provider = OIDCProvider(
+    authority=settings.oidc_authority,
+    client_id=settings.oidc_client_id,
+)

@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -12,6 +13,11 @@ class Settings(BaseSettings):
     )
     git_commit: str = "local-dev"
 
+{%- if use_oidc %}
+    oidc_authority: str
+    oidc_client_id: str
+
+{%- endif %}
     db_username: str = "local_user"
     db_password: str = "local_password"
     db_host: str = "db"
@@ -28,4 +34,10 @@ class Settings(BaseSettings):
         )
 
 
-settings = Settings()
+@lru_cache
+def get_settings() -> Settings:
+    """Return cached settings."""
+    return Settings()  # type: ignore[call-arg]
+
+
+settings = get_settings()

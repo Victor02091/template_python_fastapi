@@ -7,7 +7,6 @@ from app.api.router import api_router
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.core.middleware import setup_middlewares
-from app.services.health import get_health_status
 
 setup_logging(settings.log_level)
 logger = logging.getLogger(__name__)
@@ -25,4 +24,5 @@ logger.info("Application startup configured")
 
 @app.get("/health", response_class=PlainTextResponse)
 async def health() -> str:
-    return get_health_status()
+    """Return static health status for service probes."""
+    return "OK"
