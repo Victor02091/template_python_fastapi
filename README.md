@@ -4,6 +4,8 @@ A production-ready FastAPI project template powered by **uv**.
 
 This template provides a batteries-included setup with modern tooling, strict linting, automatic formatting, and CI/CD integration, all configured to work out of the box.
 
+It is designed to work seamlessly with the [frontend template](https://github.com/Victor02091/template_react_front) for a complete full-stack setup.
+
 ## ✨ Features
 
 * **Framework:** [FastAPI](https://fastapi.tiangolo.com/) with async support and automatic OpenAPI docs.
