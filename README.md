@@ -13,6 +13,8 @@ It is designed to work seamlessly with the [frontend template](https://github.co
 * **Linter & Formatter:** [Ruff](https://github.com/astral-sh/ruff) (configured for strict imports and formatting).
 * **Type Checking:** Standard Mypy.
 * **Configuration:** [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) for type-safe environment variable management with validation.
+* **Authentication:** [OIDC](https://openid.net/connect/) support with automatic JWT signature validation and secure route dependencies (optional).
+* **Identity Provider:** Local [Keycloak](https://www.keycloak.org/) container pre-configured with mock users for instant local development (optional).
 * **Pre-commit:** Automatic hooks to ensure code quality before every commit (optional).
 * **CI/CD:** CI pipelines for GitHub Actions, GitLab CI, or Bitbucket Pipelines (optional).
 * **Containerization:** Dockerfile and docker-compose included.
