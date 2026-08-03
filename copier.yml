@@ -64,6 +64,32 @@ install_pre_commit_hooks:
   help: Install pre-commit hooks automatically?
   when: "{{ install_dependencies and add_pre_commit }}"
 
+use_oidc:
+  type: bool
+  default: true
+  help: Do you want to protect the API with OIDC Authentication?
+
+oidc_provider:
+  type: str
+  default: Local Keycloak
+  choices:
+    Local Keycloak: Local Keycloak
+    External IdP (Okta, Auth0, Azure AD, Cognito, etc.): External IdP
+  help: Select your OIDC provider strategy.
+  when: "{{ use_oidc }}"
+
+oidc_client_id:
+  type: str
+  default: my-react-spa
+  help: OIDC client/application ID (for example, Okta app client ID).
+  when: "{{ use_oidc and oidc_provider == 'External IdP' }}"
+
+oidc_authority:
+  type: str
+  default: https://your-idp.com/oauth2/default
+  help: OIDC issuer/authority URL (for example, Okta/Auth0/Azure AD).
+  when: "{{ use_oidc and oidc_provider == 'External IdP' }}"
+
 _tasks:
   - command: "uv sync"
     when: "{{ install_dependencies }}"

@@ -11,9 +11,13 @@ dependencies = [
     "alembic>=1.16.4",
     "asyncpg>=0.30.0",
     "fastapi>=0.116.0",
+    {%- if use_oidc %}
     "httpx>=0.28.1",
+    {%- endif %}
     "pydantic-settings>=2.12.0",
+    {%- if use_oidc %}
     "pyjwt[crypto]>=2.12.1",
+    {%- endif %}
     "sqlalchemy>=2.0.42",
     "uvicorn>=0.35.0",
 ]
