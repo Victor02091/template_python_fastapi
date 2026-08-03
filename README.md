@@ -12,6 +12,7 @@ It is designed to work seamlessly with the [frontend template](https://github.co
 * **Package Manager:** [uv](https://github.com/astral-sh/uv) (blazing fast replacement for pip/poetry).
 * **Linter & Formatter:** [Ruff](https://github.com/astral-sh/ruff) (configured for strict imports and formatting).
 * **Type Checking:** Standard Mypy.
+* **Configuration:** [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) for type-safe environment variable management with validation.
 * **Pre-commit:** Automatic hooks to ensure code quality before every commit (optional).
 * **CI/CD:** CI pipelines for GitHub Actions, GitLab CI, or Bitbucket Pipelines (optional).
 * **Containerization:** Dockerfile and docker-compose included.
