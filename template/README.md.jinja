@@ -6,36 +6,54 @@
 
 ### 📦 Install dependencies and dev tools
 
-This project uses uv for dependency and tooling management.
-Use this command mainly for local dev tools (ruff, mypy, pre-commit, alembic, etc.).
+This project uses [uv](https://github.com/astral-sh/uv) for dependency and virtual environment management.
+Run the following command to install all project dependencies, including local development tools (ruff, mypy, pre-commit, alembic, etc.):
 
 ```bash
 uv sync
 ```
 
-{% if add_pre_commit %}
+{%- if add_pre_commit %}
 ### 🪝 Enable pre-commit hooks
 
 ```bash
 uv run pre-commit install
 ```
+{%- endif %}
 
-{% endif %}
+### 🐍 Python Dependencies
+
+Add a new package:
+
+```bash
+uv add <package_name>
+# Examples: uv add pandas / uv add pytest --dev
+```
+
+Remove a package:
+
+```bash
+uv remove <package_name>
+```
+
+⚠️ Important: Do not use legacy commands like `uv pip install` or manually create environments with `uv venv`. The `uv add` and `uv remove` commands automatically keep `pyproject.toml`, `uv.lock`, and your virtual environment in sync.
 
 ## ▶️ Run the local stack (API + PostgreSQL)
+
+Start the services using Docker Compose:
 
 ```bash
 docker compose up
 ```
 
-Once the API is running, access FastAPI Swagger UI at:
+Once the API is running, access the FastAPI Swagger UI at:
 
-- `http://localhost:8000/docs`
+- 📖 Docs: `http://localhost:8000/docs`
 
-{% if use_oidc and oidc_provider == 'Local Keycloak' %}
+{%- if use_oidc and oidc_provider == 'Local Keycloak' %}
 ### 🔐 Local Keycloak login
 
-If you selected Local Keycloak, you can log in in your frontend with these predefined accounts:
+If you selected Local Keycloak, you can log in to your frontend with these predefined accounts:
 
 - `test_user` (password: `password`) - role `user`
 - `test_admin` (password: `password`) - role `admin`
@@ -48,11 +66,11 @@ Admin credentials:
 
 - username: `admin`
 - password: `admin`
-{% endif %}
+{%- endif %}
 
 ## 🗄️ Database migrations workflow
 
-You must use alembic inside your running container using the following commands.
+You must use Alembic inside your running container using the provided Makefile commands.
 
 Create a new revision from model changes:
 
@@ -73,6 +91,8 @@ make alembic-migrate
 ```
 
 ## ✅ Quality checks
+
+Ensure your code meets quality standards by running:
 
 ```bash
 uv run ruff check app
@@ -116,40 +136,49 @@ migrations/
 
 ## ⚙️ Environment variables
 
-Please define and import all environment variables in your code from [config.py](./app/core/config.py) file like so: 
+Please define and import all environment variables in your code from the [app/core/config.py](./app/core/config.py) file like so:
 
 ```python
+from pydantic_settings import BaseSettings
+
 class Settings(BaseSettings):
     """Load environment variables as settings."""
-    
-    my_env_variable_1: str # MY_ENV_VARIABLE_1
-    my_env_variable_2: int = 5 # MY_ENV_VARIABLE_2
+
+    my_env_variable_1: str     # Expects MY_ENV_VARIABLE_1
+    my_env_variable_2: int = 5 # Expects MY_ENV_VARIABLE_2, defaults to 5
 ```
 
-During local development, use the .env file and docker-compose to set environment variables.
+During local development, use the `.env` file and `docker-compose.yml` to set environment variables.
 
 ## 🚀 API Routes
 
-Health endpoint:
+Health check:
 - GET /health
 
-Item endpoints:
+Items:
 - GET /api/v1/items
 - GET /api/v1/items/{item_id}
 - POST /api/v1/items
 
 ## 🐳 Docker
 
-Build image:
+Build the Docker image:
 
 ```bash
 docker build -t {{ project_name|lower|replace('_', '-')|replace(' ', '-') }} .
 ```
 
-Run container:
+Run the container locally:
 
 ```bash
+{% if use_oidc %}
+docker run -it --rm -p 8000:8000 --env-file .env \
+  -e OIDC_AUTHORITY="{% if oidc_provider == 'Local Keycloak' %}http://localhost:9080/realms/my-app{% else %}{{ oidc_authority }}{% endif %}" \
+  -e OIDC_CLIENT_ID="{% if oidc_provider == 'Local Keycloak' %}my-react-spa{% else %}{{ oidc_client_id }}{% endif %}" \
+  {{ project_name|lower|replace('_', '-')|replace(' ', '-') }}
+{% else %}
 docker run -it --rm -p 8000:8000 --env-file .env {{ project_name|lower|replace('_', '-')|replace(' ', '-') }}
+{% endif %}
 ```
 
 ## 📧 Contacts
