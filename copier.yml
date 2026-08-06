@@ -133,6 +133,10 @@ oidc_authority:
 _tasks:
   - command: "uv sync"
     when: "{{ install_dependencies }}"
+  - command: "uv run ruff check --fix --exit-zero ."
+    when: "{{ install_dependencies }}"
+  - command: "uv run ruff format ."
+    when: "{{ install_dependencies }}"
 
   - command: |
       if [ ! -d .git ]; then
