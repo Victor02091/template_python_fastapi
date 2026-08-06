@@ -2,9 +2,10 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
+from app.models.mixins import TimestampMixin
 
 
-class Item(Base):
+class Item(Base, TimestampMixin):
     """Example Item model used as a template vertical slice."""
 
     __tablename__ = "items"
