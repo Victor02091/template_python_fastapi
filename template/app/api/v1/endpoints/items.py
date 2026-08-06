@@ -10,7 +10,7 @@ from app.schemas.item import ItemCreate, ItemRead
 router = APIRouter(prefix="/items")
 
 
-@router.get("", response_model=list[ItemRead])
+@router.get("")
 async def read_items(
     db: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> list[ItemRead]:
@@ -19,7 +19,7 @@ async def read_items(
     return [ItemRead.model_validate(item) for item in items]
 
 
-@router.get("/{item_id}", response_model=ItemRead)
+@router.get("/{item_id}")
 async def read_item(
     item_id: int,
     db: Annotated[AsyncSession, Depends(get_db_session)],
@@ -34,7 +34,7 @@ async def read_item(
     return ItemRead.model_validate(item)
 
 
-@router.post("", response_model=ItemRead, status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def create_new_item(
     item_in: ItemCreate,
     db: Annotated[AsyncSession, Depends(get_db_session)],
