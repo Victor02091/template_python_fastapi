@@ -2,25 +2,51 @@ _jinja_extensions:
   - copier_template_extensions.TemplateExtensionLoader
   - extensions/context.py:GitInfoExtension
 
+# TEMPLATE QUESTIONS
+
 project_name:
   type: str
   help: Human-readable project name
-  default: "{{ current_folder_name | replace('_', ' ') | replace('-', ' ') | title }}"
+  default: "{{ current_folder_name | default('My Project', true) | replace('_', ' ') | replace('-', ' ') | title }}"
+  validator: >-
+    {%- if not project_name -%}
+    Error: Project name cannot be empty.
+    {%- elif '"' in project_name or '\n' in project_name -%}
+    Error: Project name cannot contain double quotes or newlines.
+    {%- endif -%}
 
 author_name:
   type: str
   help: Author name
   default: "{{ git_user_name | default('Your Name', true) }}"
+  validator: >-
+    {%- if not author_name -%}
+    Error: Author name cannot be empty.
+    {%- elif '"' in author_name or '\n' in author_name -%}
+    Error: Author name cannot contain double quotes or newlines.
+    {%- endif -%}
 
 author_email:
   type: str
   help: Author email
-  default: "{{ git_user_email | default('your@email.com', true) }}"
+  default: >-
+    {%- set email = git_user_email | default('your@email.com', true) -%}
+    {{- email if '@' in email and '.' in email else 'your@email.com' -}}
+  validator: >-
+    {%- if "@" not in author_email or "." not in author_email -%}
+    Error: Please enter a valid email address (must contain @ and .).
+    {%- elif '"' in author_email or ' ' in author_email or '\n' in author_email -%}
+    Error: Email cannot contain spaces, quotes, or newlines.
+    {%- endif -%}
 
 description:
   type: str
   help: Short project description
   default: A FastAPI service.
+  validator: >-
+    {%- if '"' in description or '\n' in description -%}
+    Error: Description cannot contain double quotes or newlines (use single quotes instead).
+    {%- endif -%}
 
 python_version:
   type: str
@@ -83,12 +109,26 @@ oidc_client_id:
   default: my-react-spa
   help: OIDC client/application ID (for example, Okta app client ID).
   when: "{{ use_oidc and oidc_provider == 'External IdP' }}"
+  validator: >-
+    {%- if not oidc_client_id -%}
+    Error: Client ID cannot be empty.
+    {%- elif '"' in oidc_client_id or ' ' in oidc_client_id or '\n' in oidc_client_id -%}
+    Error: Client ID cannot contain spaces, double quotes, or newlines.
+    {%- endif -%}
 
 oidc_authority:
   type: str
   default: https://your-idp.com/oauth2/default
   help: OIDC issuer/authority URL (for example, Okta/Auth0/Azure AD).
   when: "{{ use_oidc and oidc_provider == 'External IdP' }}"
+  validator: >-
+    {%- if not (oidc_authority.startswith('http://') or oidc_authority.startswith('https://')) -%}
+    Error: The authority must be a valid URL starting with http:// or https://
+    {%- elif '"' in oidc_authority or ' ' in oidc_authority or '\n' in oidc_authority -%}
+    Error: The URL cannot contain spaces, double quotes, or newlines.
+    {%- endif -%}
+
+# POST-GENERATION TASKS
 
 _tasks:
   - command: "uv sync"
