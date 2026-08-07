@@ -131,7 +131,7 @@ oidc_authority:
 # POST-GENERATION TASKS
 
 _tasks:
-  - command: "uv sync"
+  - command: "uv sync --quiet"
     when: "{{ install_dependencies }}"
 
   # If dependencies are installed
@@ -147,30 +147,7 @@ _tasks:
   - command: "uv tool run ruff format --quiet ."
     when: "{{ not install_dependencies }}"
 
-  - command: |
-      if [ ! -d .git ]; then
-          git init
-      fi
-
-      if ! git ls-files .copier-answers.yml --error-unmatch > /dev/null 2>&1; then
-          git add .
-          git commit --no-verify -m "chore: initial commit from template"
-      fi
-
-  - command: "uv run pre-commit install"
-    when: "{{ install_pre_commit_hooks | default(false) }}"
-
-  - command: |
-        printf "\033[0;32m✨ Project {{ project_name }} successfully generated! \033[0m\n\n"
-        echo "Next steps:"
-        {%- if not install_dependencies %}
-        echo "  🚀 Get started:"
-        printf "       1. \033[36muv sync\033[0m\n"
-        printf "       2. \033[36mdocker compose up\033[0m\n"
-        {%- else %}
-        echo "  🚀 Get started:"
-        printf "       ▶  \033[36mdocker compose up\033[0m\n"
-        {%- endif %}
-
+  # Final Setup (Git, Pre-commit, Message, Self-Cleanup)
+  - command: "python .setup.py"
 
 _subdirectory: template
