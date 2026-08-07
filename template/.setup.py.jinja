@@ -1,0 +1,55 @@
+# ruff: noqa
+import os
+import subprocess
+
+# ==============================================================================
+# 1. INITIALIZE GIT & MAKE FIRST COMMIT
+# ==============================================================================
+if not os.path.exists(".git"):
+    subprocess.run(["git", "init"], capture_output=True, check=False)
+
+res = subprocess.run(["git", "ls-files", ".copier-answers.yml", "--error-unmatch"], capture_output=True, check=False)
+if res.returncode != 0:
+    subprocess.run(["git", "add", "."], capture_output=True, check=False)
+    
+    # Un-stage this setup script before committing
+    script_name = os.path.basename(__file__)
+    subprocess.run(["git", "rm", "--cached", script_name], capture_output=True, check=False)
+    
+    subprocess.run(["git", "commit", "--no-verify", "-m", "chore: initial commit from template"], capture_output=True, check=False)
+
+
+# ==============================================================================
+# 2. INSTALL PRE-COMMIT HOOKS
+# ==============================================================================
+# Doing this AFTER the initial commit is safest.
+{% if install_pre_commit_hooks | default(false) %}
+try:
+    subprocess.run(["uv", "run", "pre-commit", "install"], capture_output=True, check=False)
+except Exception:
+    pass
+{% endif %}
+
+
+# ==============================================================================
+# 3. PRINT SUCCESS MESSAGE
+# ==============================================================================
+print("\n\033[0;32m✨ Project {{ project_name }} successfully generated! \033[0m\n")
+print("Next steps:")
+{% if not install_dependencies %}
+print("  🚀 Get started:")
+print("       1. \033[36muv sync\033[0m")
+print("       2. \033[36mdocker compose up\033[0m")
+{% else %}
+print("  🚀 Get started:")
+print("       ▶  \033[36mdocker compose up\033[0m")
+{% endif %}
+
+
+# ==============================================================================
+# 4. SELF-DESTRUCT
+# ==============================================================================
+try:
+    os.remove(__file__)
+except Exception:
+    pass
