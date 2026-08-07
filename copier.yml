@@ -148,6 +148,6 @@ _tasks:
     when: "{{ not install_dependencies }}"
 
   # Final Setup (Git, Pre-commit, Message, Self-Cleanup)
-  - command: "python .setup.py"
+  - command: "uv run --quiet .setup.py"
 
 _subdirectory: template
