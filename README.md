@@ -8,7 +8,7 @@ It is designed to work seamlessly with the [frontend template](https://github.co
 
 Use this template : 
 
-        copier copy --trust https://github.com/Victor02091/template_python_fastapi .
+    copier copy --trust https://github.com/Victor02091/template_python_fastapi .
 
 <p align="center">
   <img src="images/copier_demo.png" alt="copier" width="600">
