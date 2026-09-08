@@ -6,24 +6,13 @@ This template provides a batteries-included setup with modern tooling, strict li
 
 It is designed to work seamlessly with the [frontend template](https://github.com/Victor02091/template_react_front) for a complete full-stack setup.
 
-## ✨ Features
+Use this template : 
 
-* **Framework:** [FastAPI](https://fastapi.tiangolo.com/) with async support and automatic OpenAPI docs.
-* **Package Manager:** [uv](https://github.com/astral-sh/uv) (blazing fast replacement for pip/poetry).
-* **Linter & Formatter:** [Ruff](https://github.com/astral-sh/ruff) (configured for strict imports and formatting).
-* **Type Checking:** Standard Mypy.
-* **Configuration:** [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) for type-safe environment variable management with validation.
-* **Authentication:** [OIDC](https://openid.net/connect/) support with automatic JWT signature validation and secure route dependencies (optional).
-* **Identity Provider:** Local [Keycloak](https://www.keycloak.org/) container pre-configured with mock users for instant local development (optional).
-* **Pre-commit:** Automatic hooks to ensure code quality before every commit (optional).
-* **CI/CD:** CI pipelines for GitHub Actions, GitLab CI, or Bitbucket Pipelines (optional).
-* **Containerization:** Dockerfile and docker-compose included.
-* **Database:** [SQLAlchemy](https://www.sqlalchemy.org/) ORM with async support, [Alembic](https://alembic.sqlalchemy.org/) migrations, and [PostgreSQL](https://www.postgresql.org/) via `asyncpg` pre-configured.
-* **Editor:** VS Code settings (extensions, and linting) pre-configured.
+        copier copy --trust https://github.com/Victor02091/template_python_fastapi .
 
-## 📸 Swagger UI Preview
-
-![Swagger UI screenshot](images/swagger_ui.png)
+<p align="center">
+  <img src="images/copier_demo.png" alt="copier" width="600">
+</p>
 
 ## 📂 Project Structure
 
@@ -45,6 +34,25 @@ your-project/
 ├── Makefile
 └── pyproject.toml
 ```
+
+## ✨ Features
+
+* **Framework:** [FastAPI](https://fastapi.tiangolo.com/) with async support and automatic OpenAPI docs.
+* **Package Manager:** [uv](https://github.com/astral-sh/uv) (blazing fast replacement for pip/poetry).
+* **Linter & Formatter:** [Ruff](https://github.com/astral-sh/ruff) (configured for strict imports and formatting).
+* **Type Checking:** Standard Mypy.
+* **Configuration:** [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) for type-safe environment variable management with validation.
+* **Authentication:** [OIDC](https://openid.net/connect/) support with automatic JWT signature validation and secure route dependencies (optional).
+* **Identity Provider:** Local [Keycloak](https://www.keycloak.org/) container pre-configured with mock users for instant local development (optional).
+* **Pre-commit:** Automatic hooks to ensure code quality before every commit (optional).
+* **CI/CD:** CI pipelines for GitHub Actions, GitLab CI, or Bitbucket Pipelines (optional).
+* **Containerization:** Dockerfile and docker-compose included.
+* **Database:** [SQLAlchemy](https://www.sqlalchemy.org/) ORM with async support, [Alembic](https://alembic.sqlalchemy.org/) migrations, and [PostgreSQL](https://www.postgresql.org/) via `asyncpg` pre-configured.
+* **Editor:** VS Code settings (extensions, and linting) pre-configured.
+
+## 📸 Swagger UI Preview
+
+![Swagger UI screenshot](images/swagger_ui.png)
 
 ## 🛠️ Requirements
 
