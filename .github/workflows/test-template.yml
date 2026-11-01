@@ -68,12 +68,13 @@ jobs:
         working-directory: generated-project-${{ matrix.mode }}
         run: |
           docker compose up -d --wait
-          
-          # Give the API a few seconds to run migrations and boot up
-          sleep 5 
-          
+
           # Hit the dedicated /health endpoint
-          curl --fail --silent --show-error http://localhost:8000/health > /dev/null
+          curl --fail --silent --show-error \
+            --retry 5 \
+            --retry-connrefused \
+            --retry-delay 3 \
+            http://127.0.0.1:8000/health > /dev/null
 
       - name: Print Docker Logs on Failure
         if: failure()
