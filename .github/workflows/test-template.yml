@@ -70,9 +70,9 @@ jobs:
           docker compose up -d --wait
 
           # Hit the dedicated /health endpoint
-          curl --fail --silent --show-error \
+          curl -v --fail --silent --show-error \
             --retry 5 \
-            --retry-connrefused \
+            --retry-all-errors \
             --retry-delay 3 \
             http://127.0.0.1:8000/health > /dev/null
 
