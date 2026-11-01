@@ -18,7 +18,7 @@ dependencies = [
     {%- if use_oidc %}
     "pyjwt[crypto]>=2.12.1",
     {%- endif %}
-    "sqlalchemy>=2.0.42",
+    "sqlalchemy[asyncio]>=2.0.42",
     "uvicorn>=0.35.0",
 ]
 
