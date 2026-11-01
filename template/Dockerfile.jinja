@@ -32,6 +32,8 @@ COPY migrations ./migrations
 FROM base
 COPY --from=builder /app /app
 
+ENV PYTHONUNBUFFERED=1
+
 # Add git commit
 ARG GIT_COMMIT="" 
 ENV GIT_COMMIT=${GIT_COMMIT}

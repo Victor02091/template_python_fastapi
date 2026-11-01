@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout template repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Git config
         run: |
@@ -31,12 +31,12 @@ jobs:
           git config --global user.email "github-actions-bot@users.noreply.github.com"
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v10.3.2
         with:
           enable-cache: true
 
@@ -48,7 +48,7 @@ jobs:
           # --trust allows Copier to run your post-generation _tasks
           # --defaults accepts all default answers automatically
           # --data explicitly forces the OIDC state for this matrix permutation
-          copier copy --trust --defaults --data use_oidc=${{ matrix.use_oidc }} . generated-project-${{ matrix.mode }}
+          copier copy --trust --vcs-ref HEAD --defaults --data use_oidc=${{ matrix.use_oidc }} . generated-project-${{ matrix.mode }}
 
       - name: Lint Code (Ruff)
         working-directory: generated-project-${{ matrix.mode }}
@@ -68,12 +68,13 @@ jobs:
         working-directory: generated-project-${{ matrix.mode }}
         run: |
           docker compose up -d --wait
-          
-          # Give the API a few seconds to run migrations and boot up
-          sleep 5 
-          
+
           # Hit the dedicated /health endpoint
-          curl --fail --silent --show-error http://localhost:8000/health > /dev/null
+          curl -v --fail --silent --show-error \
+            --retry 5 \
+            --retry-all-errors \
+            --retry-delay 3 \
+            http://127.0.0.1:8000/health > /dev/null
 
       - name: Print Docker Logs on Failure
         if: failure()
